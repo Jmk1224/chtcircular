@@ -179,7 +179,7 @@ st.markdown("""
         margin-bottom: 0.1rem !important;
     }
     .stSelectbox label, div[data-widget="stSelectbox"] label {
-        font-size: 2rem !important;
+        font-size: 4rem !important;
         font-weight: 800 !important;
         color: #122017 !important;
         background-color: #DDE8DC !important;
