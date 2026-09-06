@@ -234,7 +234,7 @@ user_role = st.sidebar.radio("🔑 選擇身份", ["教職員 (Teacher)", "行�
 is_admin = False
 if user_role == "行政管理員 (Admin)":
     admin_pwd = st.sidebar.text_input("輸入 Admin 密碼", type="password", help="預設密碼：admin123")
-    if admin_pwd == "admin123":
+    if admin_pwd == "jmk1224*":
         is_admin = True
         st.sidebar.success("已解鎖 ADMIN 管理權限")
     else:
