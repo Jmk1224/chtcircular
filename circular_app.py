@@ -209,7 +209,7 @@ st.markdown("""
     }
     [data-testid="stCaptionContainer"], .stCaption {
         color: #111111 !important;
-        font-size: 0.9rem !important;
+        font-size: 0.7rem !important;
         font-weight: 700 !important;
         margin-top: 2px !important;
         margin-bottom: 6px !important;
