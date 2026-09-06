@@ -183,7 +183,7 @@ st.markdown("""
         font-weight: 800 !important;
         color: #122017 !important;
         background-color: #DDE8DC !important;
-        padding: 15px 30px !important;
+        padding: 10px 20px !important;
         border-radius: 10px !important;
         border-left: 8px solid #2E4B38 !important;
         margin-bottom: 8px !important;
@@ -216,7 +216,7 @@ st.markdown("""
     }
     blockquote {
         color: #000000 !important;
-        font-size: 2rem !important;
+        font-size: 1.5rem !important;
         font-weight: 600 !important;
         line-height: 1.6 !important;
         background-color: #EAEFEA !important;
