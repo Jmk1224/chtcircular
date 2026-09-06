@@ -14,7 +14,7 @@ except ImportError:
     HAS_CANVAS = False
 
 # -----------------------------------------------------------------------------
-# 0. JSON 自動存取 helper 函數 (解決刷新網頁資料消失問題)
+# 0. JSON 自動存取 helper 函數
 # -----------------------------------------------------------------------------
 CIRCULARS_FILE = "circulars_data.json"
 STAFF_FILE = "staff_data.json"
@@ -34,7 +34,6 @@ def load_staff_from_json():
             return df
         except Exception:
             pass
-    # 預設名單含 group 欄位
     return pd.DataFrame([
         {"staff_id": "001", "name": "張校長", "email": "principal@school.edu.hk", "group": "校長室"},
         {"staff_id": "002", "name": "李老師", "email": "teacher1@school.edu.hk", "group": "P.1 Teacher"},
@@ -56,7 +55,6 @@ def save_circulars_to_json():
                 "status": sinfo.get("status", False),
                 "time": sinfo.get("time", "")
             }
-            # 將 PIL 圖片轉為 Base64 字串儲存
             if "image" in sinfo and sinfo["image"] is not None:
                 buf = io.BytesIO()
                 sinfo["image"].save(buf, format="PNG")
@@ -70,7 +68,7 @@ def save_circulars_to_json():
             "id": cinfo["id"],
             "title": cinfo["title"],
             "description": cinfo["description"],
-            "deadline": str(cinfo["deadline"]), # 日期轉字串
+            "deadline": str(cinfo["deadline"]),
             "published_at": cinfo["published_at"],
             "target_type": cinfo.get("target_type", "全體教職員"),
             "target_groups": cinfo.get("target_groups", []),
@@ -105,12 +103,10 @@ def load_circulars_from_json():
                     sig_entry["image"] = None
                 signatures[str(sid)] = sig_entry
                 
-            # 將日期字串還原為 datetime.date
             deadline_val = cinfo.get("deadline")
             if isinstance(deadline_val, str):
                 deadline_val = datetime.datetime.strptime(deadline_val, "%Y-%m-%d").date()
                 
-            # 預設 target_ids 處理 (向下相容舊資料)
             default_target_ids = st.session_state.staff_df["staff_id"].astype(str).tolist() if "staff_df" in st.session_state else []
 
             loaded_circulars[cid] = {
@@ -130,7 +126,7 @@ def load_circulars_from_json():
         return {}
 
 # -----------------------------------------------------------------------------
-# 1. 頁面配置與高對比 Dropdown 選單 CSS (莫蘭迪高對比配色)
+# 1. 頁面配置與 CSS 樣式
 # -----------------------------------------------------------------------------
 st.set_page_config(
     page_title="學校電子傳閱與簽核系統",
@@ -138,7 +134,6 @@ st.set_page_config(
     layout="wide"
 )
 
-# 初始化版面文字設定 (Admin 可自訂)
 if "site_config" not in st.session_state:
     st.session_state.site_config = {
         "system_title": "🌿 學校電子傳閱與簽核系統",
@@ -162,8 +157,6 @@ st.markdown("""
         background-color: #EFECE6 !important;
         border-right: 1px solid #E2DDD5;
     }
-
-    /* ⚡ 縮減全站元件之間的上下空隙 (減少 Space) */
     div[data-testid="stVerticalBlock"] {
         gap: 0.7rem !important;
     }
@@ -173,8 +166,6 @@ st.markdown("""
     hr {
         margin: 0.6rem 0 !important;
     }
-
-    /* 1. 傳閱文件標題 大字體 */
     h1 {
         font-size: 2.3rem !important;
         color: #1F3025 !important;
@@ -187,10 +178,8 @@ st.markdown("""
         font-weight: 800 !important;
         margin-bottom: 0.1rem !important;
     }
-
-    /* 2. 下拉選單標題 Label */
     .stSelectbox label, div[data-widget="stSelectbox"] label {
-        font-size: 2rem !important;     /* 特大標題 */
+        font-size: 2rem !important;
         font-weight: 800 !important;
         color: #122017 !important;
         background-color: #DDE8DC !important;
@@ -200,40 +189,34 @@ st.markdown("""
         margin-bottom: 4px !important;
         display: inline-block !important;
     }
-
-    /* 3. 放大 BOX 外框與選單文字 */
     div[data-baseweb="select"] {
         border-radius: 12px !important;
         border: 2.5px solid #2E4B38 !important;
         background-color: #FFFFFF !important;
         box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.08) !important;
-        min-height: 80px !important;       /* BOX 盒子高度 */
+        min-height: 80px !important;
         display: flex !important;
         align-items: center !important;
     }
     div[data-baseweb="select"] * {
-        font-size: 2rem !important;     /* 選項文字特大號 */
+        font-size: 2rem !important;
         font-weight: 800 !important;
-        color: #000000 !important;        /* 高對比純黑 */
+        color: #000000 !important;
     }
     ul[data-baseweb="menu"] li {
-        font-size: 1.4rem !important;     /* 展開選單時的文字 */
+        font-size: 1.4rem !important;
         padding: 16px 20px !important;
     }
-
-    /* 4. 發佈時間與截止日期 */
     [data-testid="stCaptionContainer"], .stCaption {
-        color: #111111 !important;        /* 純黑深色 */
-        font-size: 0.9rem !important;    /* 特大字體 */
+        color: #111111 !important;
+        font-size: 0.9rem !important;
         font-weight: 700 !important;
         margin-top: 2px !important;
         margin-bottom: 6px !important;
     }
-
-    /* 5. 傳閱內文說明區塊 (blockquote) */
     blockquote {
-        color: #000000 !important;        /* 純黑深色 */
-        font-size: 1rem !important;     /* 特大內文 */
+        color: #000000 !important;
+        font-size: 1rem !important;
         font-weight: 600 !important;
         line-height: 1.6 !important;
         background-color: #EAEFEA !important;
@@ -243,8 +226,6 @@ st.markdown("""
         margin-top: 0.3rem !important;
         margin-bottom: 0.3rem !important;
     }
-
-    /* 按鈕樣式 */
     .stButton>button {
         background-color: #2E4B38 !important;
         color: #FFFFFF !important;
@@ -261,7 +242,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # -----------------------------------------------------------------------------
-# 2. 初始化 Session State (自動讀取 JSON 檔案)
+# 2. 初始化 Session State
 # -----------------------------------------------------------------------------
 if "staff_df" not in st.session_state:
     st.session_state.staff_df = load_staff_from_json()
@@ -270,7 +251,7 @@ if "circulars" not in st.session_state:
     st.session_state.circulars = load_circulars_from_json()
 
 # -----------------------------------------------------------------------------
-# 3. 側邊欄：權限管控與導覽
+# 3. 側邊欄導覽
 # -----------------------------------------------------------------------------
 st.sidebar.title(cfg["sidebar_title"])
 
@@ -307,7 +288,7 @@ st.sidebar.markdown("---")
 st.sidebar.caption(f"目前已有 {len(st.session_state.circulars)} 份傳閱單紀錄 (已啟用 JSON 永久儲存)")
 
 # -----------------------------------------------------------------------------
-# 頁面 1：發佈新傳閱單 (ADMIN)
+# 頁面 1：發佈新傳閱單 (ADMIN) - 已移除 st.form 以支援動態選單觸發
 # -----------------------------------------------------------------------------
 if menu == "➕ 發佈新傳閱單":
     st.title("➕ 發佈新電子傳閱單")
@@ -322,43 +303,42 @@ if menu == "➕ 發佈新傳閱單":
     if active_circulars:
         st.info(f"💡 目前有 {len(active_circulars)} 份進行中的傳閱單（最新：《{active_circulars[-1]}》）。")
     
-    with st.form("publish_form"):
-        new_title = st.text_input("📄 文件名稱 / 事由", placeholder="例：【行政傳閱】P.1 教師會議紀錄")
-        new_desc = st.text_area("📝 傳閱說明 / 附件摘要", placeholder="請各位老師詳細閱讀，並於視窗內完成電子手寫簽署。")
-        new_deadline = st.date_input("📅 簽核截止日期", value=today + datetime.timedelta(days=3))
-        
-        st.markdown("### 🎯 設定指派簽核對象")
-        target_type = st.radio(
-            "請選擇發送對象範圍：",
-            ["全體教職員", "按組別指派 (Group)", "按個人指派 (Individual)"],
-            horizontal=True
+    new_title = st.text_input("📄 文件名稱 / 事由", placeholder="例：【行政傳閱】P.1 教師會議紀錄")
+    new_desc = st.text_area("📝 傳閱說明 / 附件摘要", placeholder="請各位老師詳細閱讀，並於視窗內完成電子手寫簽署。")
+    new_deadline = st.date_input("📅 簽核截止日期", value=today + datetime.timedelta(days=3))
+    
+    st.markdown("### 🎯 設定指派簽核對象")
+    target_type = st.radio(
+        "請選擇發送對象範圍：",
+        ["全體教職員", "按組別指派 (Group)", "按個人指派 (Individual)"],
+        horizontal=True
+    )
+    
+    all_groups = sorted([g for g in st.session_state.staff_df["group"].dropna().unique().tolist() if g])
+    
+    selected_groups = []
+    selected_individual_ids = []
+    
+    # ⚡ 即時根據選擇展開對應下拉選單
+    if target_type == "按組別指派 (Group)":
+        selected_groups = st.multiselect("選擇接收此傳閱單的組別：", options=all_groups, default=all_groups[:1] if all_groups else [])
+    elif target_type == "按個人指派 (Individual)":
+        staff_dict = {
+            str(row["staff_id"]): f"{row['name']} ({row['group']})" 
+            for _, row in st.session_state.staff_df.iterrows()
+        }
+        selected_individual_ids = st.multiselect(
+            "選擇指定教職員：", 
+            options=list(staff_dict.keys()), 
+            format_func=lambda x: staff_dict[x]
         )
         
-        all_groups = sorted([g for g in st.session_state.staff_df["group"].dropna().unique().tolist() if g])
-        
-        selected_groups = []
-        selected_individual_ids = []
-        
-        if target_type == "按組別指派 (Group)":
-            selected_groups = st.multiselect("選擇接收此傳閱單的組別：", options=all_groups, default=all_groups[:1] if all_groups else [])
-        elif target_type == "按個人指派 (Individual)":
-            staff_dict = {
-                str(row["staff_id"]): f"{row['name']} ({row['group']})" 
-                for _, row in st.session_state.staff_df.iterrows()
-            }
-            selected_individual_ids = st.multiselect(
-                "選擇指定教職員：", 
-                options=list(staff_dict.keys()), 
-                format_func=lambda x: staff_dict[x]
-            )
-            
-        submit_btn = st.form_submit_button("🚀 發佈新傳閱單")
+    submit_btn = st.button("🚀 發佈新傳閱單")
         
     if submit_btn:
         if not new_title.strip():
             st.error("請輸入文件名稱！")
         else:
-            # 計算 target_ids
             if target_type == "全體教職員":
                 final_target_ids = st.session_state.staff_df["staff_id"].astype(str).tolist()
             elif target_type == "按組別指派 (Group)":
@@ -367,7 +347,7 @@ if menu == "➕ 發佈新傳閱單":
                     st.stop()
                 matched_df = st.session_state.staff_df[st.session_state.staff_df["group"].isin(selected_groups)]
                 final_target_ids = matched_df["staff_id"].astype(str).tolist()
-            else: # 按個人指派
+            else:
                 if not selected_individual_ids:
                     st.error("請至少選擇一位教職員！")
                     st.stop()
@@ -388,8 +368,9 @@ if menu == "➕ 發佈新傳閱單":
                     "target_ids": final_target_ids,
                     "signatures": {}
                 }
-                save_circulars_to_json()  # 💾 寫入 JSON
+                save_circulars_to_json()
                 st.success(f"🎉 成功發佈《{new_title}》！指派人數：{len(final_target_ids)} 人。")
+                st.rerun()
 
 # -----------------------------------------------------------------------------
 # 頁面 2：教師名單管理 (ADMIN)
@@ -426,7 +407,7 @@ elif menu == "👥 教師名單管理":
                     st.session_state.staff_df = pd.concat([df, new_row], ignore_index=True)
                     st.success(f"已新增成員 {s_name}（組別：{s_group}）！")
                 
-                save_staff_to_json()  # 💾 寫入 JSON
+                save_staff_to_json()
                 st.rerun()
                 
         with col_b:
@@ -434,7 +415,7 @@ elif menu == "👥 教師名單管理":
             del_name = st.selectbox("選擇要移除的教職員：", st.session_state.staff_df["name"].tolist())
             if st.button("🗑️ 刪除該成員"):
                 st.session_state.staff_df = st.session_state.staff_df[st.session_state.staff_df["name"] != del_name]
-                save_staff_to_json()  # 💾 寫入 JSON
+                save_staff_to_json()
                 st.success(f"已刪除 {del_name}")
                 st.rerun()
                 
@@ -452,7 +433,7 @@ elif menu == "👥 教師名單管理":
                     if "group" not in new_df.columns:
                         new_df["group"] = "未分類"
                     st.session_state.staff_df = new_df[["staff_id", "name", "group", "email"]]
-                    save_staff_to_json()  # 💾 寫入 JSON
+                    save_staff_to_json()
                     st.success("教職員名單更新成功！")
                     st.rerun()
                 else:
@@ -482,7 +463,6 @@ elif menu == "📝 教師簽核":
         
         col1, col2 = st.columns([1, 1])
         with col1:
-            # 📍 僅過濾並顯示被指派至該傳閱單的教職員
             target_ids = [str(x) for x in circular.get("target_ids", st.session_state.staff_df["staff_id"].astype(str).tolist())]
             eligible_staff = st.session_state.staff_df[st.session_state.staff_df["staff_id"].astype(str).isin(target_ids)]
 
@@ -527,7 +507,7 @@ elif menu == "📝 教師簽核":
                                     "time": now_str,
                                     "image": img
                                 }
-                                save_circulars_to_json()  # 💾 寫入 JSON (包含簽名檔 Base64)
+                                save_circulars_to_json()
                                 st.success("🎉 電子簽署完成並已寫入紀錄！")
                                 st.rerun()
                     else:
@@ -535,12 +515,12 @@ elif menu == "📝 教師簽核":
                         if st.button("🖊️ 確認完成簽核"):
                             now_str = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
                             circular["signatures"][sid] = {"status": True, "time": now_str, "image": None}
-                            save_circulars_to_json()  # 💾 寫入 JSON
+                            save_circulars_to_json()
                             st.success("🎉 完成簽核！")
                             st.rerun()
 
 # -----------------------------------------------------------------------------
-# 頁面 4：傳閱進度看板 (同事可相互查看進度 + ADMIN 簽名畫廊)
+# 頁面 4：傳閱進度看板
 # -----------------------------------------------------------------------------
 elif menu == "📊 傳閱進度看板":
     st.title(cfg["progress_page_title"])
@@ -552,7 +532,6 @@ elif menu == "📊 傳閱進度看板":
         selected_cid = st.selectbox("📌 檢視傳閱文件進度：", options=list(c_options.keys()), format_func=lambda x: c_options[x])
         circular = st.session_state.circulars[selected_cid]
         
-        # 📍 僅載入被指派至該傳閱單的教職員進行統計
         target_ids = [str(x) for x in circular.get("target_ids", st.session_state.staff_df["staff_id"].astype(str).tolist())]
         df = st.session_state.staff_df[st.session_state.staff_df["staff_id"].astype(str).isin(target_ids)].copy()
         df["staff_id"] = df["staff_id"].astype(str)
@@ -594,7 +573,6 @@ elif menu == "📊 傳閱進度看板":
                 use_container_width=True
             )
             
-        # ADMIN 獨享：圖文並茂快速審視畫廊 + 單獨重置功能
         if is_admin and len(tabs) > 2:
             with tabs[2]:
                 st.subheader("🖼️ 所有指派教職員簽名圖檔一覽")
@@ -615,10 +593,9 @@ elif menu == "📊 傳閱進度看板":
                             else:
                                 st.success("已完成簽核 (無圖檔)")
                             
-                            # 🔴 ADMIN 重置按鈕
                             if st.button(f"🔄 重置 {s_name} 的簽核", key=f"reset_{selected_cid}_{sid}"):
-                                circular["signatures"].pop(sid, None)  # 刪除該筆簽核紀錄
-                                save_circulars_to_json()              # 即時寫入 JSON 儲存
+                                circular["signatures"].pop(sid, None)
+                                save_circulars_to_json()
                                 st.success(f"已重置 {s_name} 的簽核！該位同事現在可以重新簽署。")
                                 st.rerun()
                         else:
@@ -626,7 +603,7 @@ elif menu == "📊 傳閱進度看板":
                         st.markdown("---")
 
 # -----------------------------------------------------------------------------
-# 頁面 5：行政管理與 Excel 匯出（含刪除傳閱單功能）
+# 頁面 5：行政管理與 Excel 匯出（含刪除表格功能）
 # -----------------------------------------------------------------------------
 elif menu == "🛠️ 行政管理與 Excel 匯出":
     st.title(cfg["admin_title"])
@@ -656,7 +633,6 @@ elif menu == "🛠️ 行政管理與 Excel 匯出":
         
         st.dataframe(export_df, use_container_width=True)
         
-        # 下載 Excel 報告
         buffer = io.BytesIO()
         with pd.ExcelWriter(buffer, engine='openpyxl') as writer:
             export_df.to_excel(writer, index=False, sheet_name='傳閱簽核結果')
@@ -669,15 +645,15 @@ elif menu == "🛠️ 行政管理與 Excel 匯出":
             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         )
         
-        # 🗑️ ADMIN 刪除傳閱單功能區塊
+        # 🗑️ ADMIN 刪除傳閱單功能
         st.markdown("---")
         with st.expander("🗑️ 刪除此傳閱單紀錄 (ADMIN 限用)", expanded=False):
             st.error("⚠️ 警告：刪除後將無法復原，該份傳閱單的所有簽核紀錄與手寫簽名圖檔將一併刪除！")
             confirm_delete = st.checkbox(f"我確定要永久刪除《{circular['title']}》", key=f"del_chk_{selected_cid}")
             
             if st.button("🔥 確定刪除這份傳閱單", key=f"del_btn_{selected_cid}", disabled=not confirm_delete):
-                del st.session_state.circulars[selected_cid]  # 從 session_state 刪除
-                save_circulars_to_json()                      # 同步寫入 JSON 檔案
+                del st.session_state.circulars[selected_cid]
+                save_circulars_to_json()
                 st.success(f"已成功刪除傳閱單《{circular['title']}》！")
                 st.rerun()
 
