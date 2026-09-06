@@ -144,7 +144,7 @@ st.markdown("""
     <style>
     .stApp {
         background-color: #FAF8F5;
-        color: #383531;
+        color: #1A1A1A;
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang TC", "Noto Sans TC", sans-serif;
     }
     section[data-testid="stSidebar"] {
@@ -152,65 +152,73 @@ st.markdown("""
         border-right: 1px solid #E2DDD5;
     }
     h1, h2, h3, h4, h5 {
-        color: #38483B !important;
-        font-weight: 600;
+        color: #1F3025 !important;
+        font-weight: 700;
     }
 
-    /* Drop Down List (st.selectbox) 放大與顯眼配色 */
+    /* 1. 放大 Drop Down 選單標題 (例如：📌 請選擇要簽核的傳閱文件： / 請選擇您的姓名：) */
     .stSelectbox label, div[data-widget="stSelectbox"] label {
-        font-size: 1.2rem !important;
-        font-weight: 700 !important;
-        color: #1F3025 !important;
-        background-color: #E3EBE1 !important;
-        padding: 4px 12px !important;
+        font-size: 1.4rem !important;   /* 字體再放大 */
+        font-weight: 800 !important;
+        color: #122017 !important;
+        background-color: #DDE8DC !important;
+        padding: 6px 14px !important;
         border-radius: 6px !important;
-        border-left: 5px solid #2E4B38 !important;
-        margin-bottom: 8px !important;
+        border-left: 6px solid #2E4B38 !important;
+        margin-bottom: 10px !important;
         display: inline-block !important;
     }
+
+    /* 2. 放大 Drop Down 選單內容選項 (例如：2627 教師時間表當值核對 / 徐 劍) */
     div[data-baseweb="select"] {
         border-radius: 10px !important;
         border: 2px solid #2E4B38 !important;
-        background-color: #F2F7F2 !important;
-        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1) !important;
-        min-height: 52px !important;
+        background-color: #FFFFFF !important;
+        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.08) !important;
+        min-height: 56px !important;
     }
     div[data-baseweb="select"] * {
-        font-size: 1.15rem !important;
-        font-weight: 600 !important;
-        color: #122017 !important;
-    }
-    div[data-baseweb="select"]:hover {
-        border-color: #1B7A43 !important;
-        background-color: #EAF3EA !important;
+        font-size: 1.35rem !important;  /* 選項文字再放大 */
+        font-weight: 700 !important;
+        color: #101813 !important;      /* 深黑色 */
     }
     ul[data-baseweb="menu"] li {
-        font-size: 1.1rem !important;
-        padding: 12px 16px !important;
+        font-size: 1.25rem !important;  /* 下拉清單內項目放大 */
+        padding: 14px 18px !important;
+    }
+
+    /* 3. 改深色與放大：發佈時間與截止日期 (st.caption) */
+    [data-testid="stCaptionContainer"], .stCaption {
+        color: #1A1A1A !important;      /* 從淺灰改為深黑 */
+        font-size: 1.15rem !important;  /* 字體加大 */
+        font-weight: 700 !important;
+        margin-top: 6px !important;
+        margin-bottom: 12px !important;
+    }
+
+    /* 4. 改深色與放大：傳閱說明引用區塊 (blockquote) */
+    blockquote {
+        color: #111111 !important;      /* 高對比深黑色 */
+        font-size: 1.25rem !important;  /* 內文放大 */
+        font-weight: 600 !important;
+        line-height: 1.7 !important;
+        background-color: #EAEFEA !important; /* 加深背景底色 */
+        border-left: 6px solid #2E4B38 !important;
+        padding: 14px 18px !important;
+        border-radius: 6px !important;
     }
 
     .stButton>button {
-        background-color: #4D6051 !important;
+        background-color: #2E4B38 !important;
         color: #FFFFFF !important;
         border-radius: 8px !important;
         border: none !important;
-        padding: 10px 22px !important;
-        font-size: 1.05rem !important;
-        font-weight: 600 !important;
+        padding: 12px 26px !important;
+        font-size: 1.15rem !important;
+        font-weight: 700 !important;
     }
     .stButton>button:hover {
-        background-color: #38483B !important;
-    }
-    
-    /* 簽名卡片樣式 */
-    .signature-card {
-        background-color: #FFFFFF;
-        border: 1px solid #D6D0C4;
-        border-radius: 10px;
-        padding: 12px;
-        text-align: center;
-        margin-bottom: 15px;
-        box-shadow: 0px 2px 6px rgba(0,0,0,0.05);
+        background-color: #1B3023 !important;
     }
     </style>
 """, unsafe_allow_html=True)
