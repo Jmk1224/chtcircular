@@ -34,7 +34,7 @@ def load_staff_from_json():
             return df
         except Exception:
             pass
-    # 預設名單新增 group 欄位
+    # 預設名單含 group 欄位
     return pd.DataFrame([
         {"staff_id": "001", "name": "張校長", "email": "principal@school.edu.hk", "group": "校長室"},
         {"staff_id": "002", "name": "李老師", "email": "teacher1@school.edu.hk", "group": "P.1 Teacher"},
@@ -64,7 +64,7 @@ def save_circulars_to_json():
             else:
                 sig_entry["image_b64"] = None
                 
-            signatures_copy[sid] = sig_entry
+            signatures_copy[str(sid)] = sig_entry
             
         data_to_save[cid] = {
             "id": cinfo["id"],
@@ -72,6 +72,9 @@ def save_circulars_to_json():
             "description": cinfo["description"],
             "deadline": str(cinfo["deadline"]), # 日期轉字串
             "published_at": cinfo["published_at"],
+            "target_type": cinfo.get("target_type", "全體教職員"),
+            "target_groups": cinfo.get("target_groups", []),
+            "target_ids": [str(x) for x in cinfo.get("target_ids", [])],
             "signatures": signatures_copy
         }
         
@@ -100,19 +103,25 @@ def load_circulars_from_json():
                     sig_entry["image"] = Image.open(io.BytesIO(img_bytes))
                 else:
                     sig_entry["image"] = None
-                signatures[sid] = sig_entry
+                signatures[str(sid)] = sig_entry
                 
             # 將日期字串還原為 datetime.date
             deadline_val = cinfo.get("deadline")
             if isinstance(deadline_val, str):
                 deadline_val = datetime.datetime.strptime(deadline_val, "%Y-%m-%d").date()
                 
+            # 預設 target_ids 處理 (向下相容舊資料)
+            default_target_ids = st.session_state.staff_df["staff_id"].astype(str).tolist() if "staff_df" in st.session_state else []
+
             loaded_circulars[cid] = {
                 "id": cinfo["id"],
                 "title": cinfo["title"],
                 "description": cinfo["description"],
                 "deadline": deadline_val,
                 "published_at": cinfo["published_at"],
+                "target_type": cinfo.get("target_type", "全體教職員"),
+                "target_groups": cinfo.get("target_groups", []),
+                "target_ids": [str(x) for x in cinfo.get("target_ids", default_target_ids)],
                 "signatures": signatures
             }
         return loaded_circulars
@@ -165,7 +174,7 @@ st.markdown("""
         margin: 0.6rem 0 !important;
     }
 
-    /* 1. 傳閱文件標題 (2627 教師時間表當值核對) 大字體 */
+    /* 1. 傳閱文件標題 大字體 */
     h1 {
         font-size: 2.3rem !important;
         color: #1F3025 !important;
@@ -179,7 +188,7 @@ st.markdown("""
         margin-bottom: 0.1rem !important;
     }
 
-    /* 2. 下拉選單標題 Label (📌 請選擇要簽核... / 請選擇您的姓名：) */
+    /* 2. 下拉選單標題 Label */
     .stSelectbox label, div[data-widget="stSelectbox"] label {
         font-size: 2rem !important;     /* 特大標題 */
         font-weight: 800 !important;
@@ -188,31 +197,31 @@ st.markdown("""
         padding: 8px 16px !important;
         border-radius: 8px !important;
         border-left: 6px solid #2E4B38 !important;
-        margin-bottom: 4px !important;    /* 縮減與 BOX 的空隙 */
+        margin-bottom: 4px !important;
         display: inline-block !important;
     }
 
-    /* 3. 放大 BOX 外框與選單文字 (例如：徐 劍) */
+    /* 3. 放大 BOX 外框與選單文字 */
     div[data-baseweb="select"] {
         border-radius: 12px !important;
         border: 2.5px solid #2E4B38 !important;
         background-color: #FFFFFF !important;
         box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.08) !important;
-        min-height: 80px !important;       /* 🔍 BOX 盒子高度大幅加高 */
+        min-height: 80px !important;       /* BOX 盒子高度 */
         display: flex !important;
         align-items: center !important;
     }
     div[data-baseweb="select"] * {
-        font-size: 2rem !important;     /* 🔍 選項文字 (徐 劍) 特大號 */
+        font-size: 2rem !important;     /* 選項文字特大號 */
         font-weight: 800 !important;
         color: #000000 !important;        /* 高對比純黑 */
     }
     ul[data-baseweb="menu"] li {
-        font-size: 1.4rem !important;     /* 展開選單時的文字特大 */
+        font-size: 1.4rem !important;     /* 展開選單時的文字 */
         padding: 16px 20px !important;
     }
 
-    /* 4. 發佈時間與截止日期 (深色 + 特大字體 + 緊湊間距) */
+    /* 4. 發佈時間與截止日期 */
     [data-testid="stCaptionContainer"], .stCaption {
         color: #111111 !important;        /* 純黑深色 */
         font-size: 0.9rem !important;    /* 特大字體 */
@@ -232,7 +241,7 @@ st.markdown("""
         padding: 12px 18px !important;
         border-radius: 8px !important;
         margin-top: 0.3rem !important;
-        margin-bottom: 0.3rem !important; /* 減少前後 Margin */
+        margin-bottom: 0.3rem !important;
     }
 
     /* 按鈕樣式 */
@@ -269,7 +278,7 @@ user_role = st.sidebar.radio("🔑 選擇身份", ["教職員 (Teacher)", "行�
 
 is_admin = False
 if user_role == "行政管理員 (Admin)":
-    admin_pwd = st.sidebar.text_input("輸入 Admin 密碼", type="password", help="預設密碼：admin123")
+    admin_pwd = st.sidebar.text_input("輸入 Admin 密碼", type="password", help="預設密碼：jmk1224*")
     if admin_pwd == "jmk1224*":
         is_admin = True
         st.sidebar.success("已解鎖 ADMIN 管理權限")
@@ -302,7 +311,7 @@ st.sidebar.caption(f"目前已有 {len(st.session_state.circulars)} 份傳閱單
 # -----------------------------------------------------------------------------
 if menu == "➕ 發佈新傳閱單":
     st.title("➕ 發佈新電子傳閱單")
-    st.write("設定傳閱文件名稱與截止日期。每次發佈均會建立獨立的新表格，並自動同步至 JSON 檔。")
+    st.write("設定傳閱文件名稱、指派對象（全體、指定組別或個人）與截止日期。")
     
     today = datetime.date.today()
     active_circulars = [
@@ -314,34 +323,80 @@ if menu == "➕ 發佈新傳閱單":
         st.info(f"💡 目前有 {len(active_circulars)} 份進行中的傳閱單（最新：《{active_circulars[-1]}》）。")
     
     with st.form("publish_form"):
-        new_title = st.text_input("📄 文件名稱 / 事由", placeholder="例：【行政傳閱】下學期校委會會議紀錄")
+        new_title = st.text_input("📄 文件名稱 / 事由", placeholder="例：【行政傳閱】P.1 教師會議紀錄")
         new_desc = st.text_area("📝 傳閱說明 / 附件摘要", placeholder="請各位老師詳細閱讀，並於視窗內完成電子手寫簽署。")
         new_deadline = st.date_input("📅 簽核截止日期", value=today + datetime.timedelta(days=3))
         
+        st.markdown("### 🎯 設定指派簽核對象")
+        target_type = st.radio(
+            "請選擇發送對象範圍：",
+            ["全體教職員", "按組別指派 (Group)", "按個人指派 (Individual)"],
+            horizontal=True
+        )
+        
+        all_groups = sorted([g for g in st.session_state.staff_df["group"].dropna().unique().tolist() if g])
+        
+        selected_groups = []
+        selected_individual_ids = []
+        
+        if target_type == "按組別指派 (Group)":
+            selected_groups = st.multiselect("選擇接收此傳閱單的組別：", options=all_groups, default=all_groups[:1] if all_groups else [])
+        elif target_type == "按個人指派 (Individual)":
+            staff_dict = {
+                str(row["staff_id"]): f"{row['name']} ({row['group']})" 
+                for _, row in st.session_state.staff_df.iterrows()
+            }
+            selected_individual_ids = st.multiselect(
+                "選擇指定教職員：", 
+                options=list(staff_dict.keys()), 
+                format_func=lambda x: staff_dict[x]
+            )
+            
         submit_btn = st.form_submit_button("🚀 發佈新傳閱單")
         
     if submit_btn:
         if not new_title.strip():
             st.error("請輸入文件名稱！")
         else:
-            cid = f"CIRC_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}"
-            st.session_state.circulars[cid] = {
-                "id": cid,
-                "title": new_title,
-                "description": new_desc,
-                "deadline": new_deadline,
-                "published_at": datetime.datetime.now().strftime("%Y-%m-%d %H:%M"),
-                "signatures": {}
-            }
-            save_circulars_to_json()  # 💾 寫入 JSON
-            st.success(f"🎉 成功發佈《{new_title}》！系統已建立新傳閱表格並永久儲存。")
+            # 計算 target_ids
+            if target_type == "全體教職員":
+                final_target_ids = st.session_state.staff_df["staff_id"].astype(str).tolist()
+            elif target_type == "按組別指派 (Group)":
+                if not selected_groups:
+                    st.error("請至少選擇一個組別！")
+                    st.stop()
+                matched_df = st.session_state.staff_df[st.session_state.staff_df["group"].isin(selected_groups)]
+                final_target_ids = matched_df["staff_id"].astype(str).tolist()
+            else: # 按個人指派
+                if not selected_individual_ids:
+                    st.error("請至少選擇一位教職員！")
+                    st.stop()
+                final_target_ids = [str(x) for x in selected_individual_ids]
+
+            if not final_target_ids:
+                st.error("⚠️ 所選條件未匹配到任何教職員，請重新選擇！")
+            else:
+                cid = f"CIRC_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}"
+                st.session_state.circulars[cid] = {
+                    "id": cid,
+                    "title": new_title,
+                    "description": new_desc,
+                    "deadline": new_deadline,
+                    "published_at": datetime.datetime.now().strftime("%Y-%m-%d %H:%M"),
+                    "target_type": target_type,
+                    "target_groups": selected_groups,
+                    "target_ids": final_target_ids,
+                    "signatures": {}
+                }
+                save_circulars_to_json()  # 💾 寫入 JSON
+                st.success(f"🎉 成功發佈《{new_title}》！指派人數：{len(final_target_ids)} 人。")
 
 # -----------------------------------------------------------------------------
 # 頁面 2：教師名單管理 (ADMIN)
 # -----------------------------------------------------------------------------
 elif menu == "👥 教師名單管理":
     st.title("👥 教師名單管理")
-    st.write("您可以自由新增、修改、刪除教職員名單，或透過 Excel/CSV 檔進行批量更新。")
+    st.write("您可以自由新增、修改、刪除教職員名單與分組（如 P.1 Teacher, P.2 Teacher），或透過 Excel/CSV 檔進行批量更新。")
     
     tab1, tab2, tab3 = st.tabs(["📋 目前名單檢視", "➕ 單筆增刪/修改", "📤 批次上傳 Excel/CSV"])
     
@@ -352,18 +407,25 @@ elif menu == "👥 教師名單管理":
         col_a, col_b = st.columns(2)
         with col_a:
             st.subheader("新增 / 修改成員")
-            s_id = st.text_input("教職編號 (Staff ID)", value="008")
+            s_id = st.text_input("教職編號 (Staff ID)", value="006")
             s_name = st.text_input("教師姓名", value="新老師")
+            s_group = st.text_input("所屬組別 (Group)", value="P.1 Teacher", help="例如：P.1 Teacher, P.2 Teacher, 校長室")
             s_email = st.text_input("電郵地址", value="teacher@school.edu.hk")
+            
             if st.button("💾 儲存 / 更新資料"):
-                df = st.session_state.staff_df
-                if s_id in df["staff_id"].astype(str).values:
-                    df.loc[df["staff_id"].astype(str) == s_id, ["name", "email"]] = [s_name, s_email]
-                    st.success(f"已更新編號 {s_id} 的資料！")
+                df = st.session_state.staff_df.copy()
+                df["staff_id"] = df["staff_id"].astype(str)
+                s_id_str = str(s_id)
+                
+                if s_id_str in df["staff_id"].values:
+                    df.loc[df["staff_id"] == s_id_str, ["name", "group", "email"]] = [s_name, s_group, s_email]
+                    st.session_state.staff_df = df
+                    st.success(f"已更新編號 {s_id_str} 的資料！")
                 else:
-                    new_row = pd.DataFrame([{"staff_id": str(s_id), "name": s_name, "email": s_email}])
+                    new_row = pd.DataFrame([{"staff_id": s_id_str, "name": s_name, "group": s_group, "email": s_email}])
                     st.session_state.staff_df = pd.concat([df, new_row], ignore_index=True)
-                    st.success(f"已新增成員 {s_name}！")
+                    st.success(f"已新增成員 {s_name}（組別：{s_group}）！")
+                
                 save_staff_to_json()  # 💾 寫入 JSON
                 st.rerun()
                 
@@ -377,7 +439,7 @@ elif menu == "👥 教師名單管理":
                 st.rerun()
                 
     with tab3:
-        uploaded_file = st.file_uploader("上傳 Excel 或 CSV 檔 (需包含 staff_id, name, email 欄位)", type=["xlsx", "csv"])
+        uploaded_file = st.file_uploader("上傳 Excel 或 CSV 檔 (建議包含 staff_id, name, group, email 欄位)", type=["xlsx", "csv"])
         if uploaded_file and st.button("📥 匯入並覆蓋名單"):
             try:
                 if uploaded_file.name.endswith(".csv"):
@@ -387,7 +449,9 @@ elif menu == "👥 教師名單管理":
                 
                 required_cols = {"staff_id", "name", "email"}
                 if required_cols.issubset(new_df.columns):
-                    st.session_state.staff_df = new_df[list(required_cols)]
+                    if "group" not in new_df.columns:
+                        new_df["group"] = "未分類"
+                    st.session_state.staff_df = new_df[["staff_id", "name", "group", "email"]]
                     save_staff_to_json()  # 💾 寫入 JSON
                     st.success("教職員名單更新成功！")
                     st.rerun()
@@ -412,61 +476,68 @@ elif menu == "📝 教師簽核":
         circular = st.session_state.circulars[selected_cid]
         
         st.subheader(f"{circular['title']}")
-        st.caption(f"發佈時間：{circular['published_at']} ｜ 截止日期：{circular['deadline']}")
+        st.caption(f"發佈時間：{circular['published_at']} ｜ 截止日期：{circular['deadline']} ｜ 指派對象：{circular.get('target_type', '全體教職員')}")
         st.markdown(f"> {circular['description']}")
         st.markdown("---")
         
         col1, col2 = st.columns([1, 1])
         with col1:
-            selected_name = st.selectbox("請選擇您的姓名：", st.session_state.staff_df["name"].tolist())
-            staff_row = st.session_state.staff_df[st.session_state.staff_df["name"] == selected_name].iloc[0]
-            sid = str(staff_row["staff_id"])
-            
-            sig_data = circular["signatures"].get(sid, {})
-            is_signed = sig_data.get("status", False)
-            
-            if is_signed:
-                st.success(f"✅ **{selected_name}**，您已於 `{sig_data['time']}` 完成電子簽署。")
-                if "image" in sig_data and sig_data["image"] is not None:
-                    st.image(sig_data["image"], caption="已儲存的手寫簽名記錄", width=220)
+            # 📍 僅過濾並顯示被指派至該傳閱單的教職員
+            target_ids = [str(x) for x in circular.get("target_ids", st.session_state.staff_df["staff_id"].astype(str).tolist())]
+            eligible_staff = st.session_state.staff_df[st.session_state.staff_df["staff_id"].astype(str).isin(target_ids)]
+
+            if eligible_staff.empty:
+                st.warning("⚠️ 此傳閱單無指定簽核人員。")
             else:
-                st.markdown("✍️ **請於下方畫布進行電子手寫簽署：**")
+                selected_name = st.selectbox("請選擇您的姓名：", eligible_staff["name"].tolist())
+                staff_row = eligible_staff[eligible_staff["name"] == selected_name].iloc[0]
+                sid = str(staff_row["staff_id"])
                 
-                if HAS_CANVAS:
-                    canvas_result = st_canvas(
-                        fill_color="rgba(255, 255, 255, 0)",
-                        stroke_width=2,
-                        stroke_color="#000000",
-                        background_color="#FFFFFF",
-                        height=150,
-                        width=350,
-                        drawing_mode="freedraw",
-                        update_streamlit=True,
-                        return_image_data=True,
-                        key=f"canvas_{selected_cid}_{sid}"
-                    )
-                    
-                    if st.button("🖊️ 確認送出電子簽署"):
-                        if canvas_result is not None and canvas_result.image_data is not None:
-                            img = Image.fromarray(canvas_result.image_data.astype('uint8'), 'RGBA')
-                            now_str = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
-                            
-                            circular["signatures"][sid] = {
-                                "status": True,
-                                "time": now_str,
-                                "image": img
-                            }
-                            save_circulars_to_json()  # 💾 寫入 JSON (包含簽名檔 Base64)
-                            st.success("🎉 電子簽署完成並已寫入紀錄！")
-                            st.rerun()
+                sig_data = circular["signatures"].get(sid, {})
+                is_signed = sig_data.get("status", False)
+                
+                if is_signed:
+                    st.success(f"✅ **{selected_name}**，您已於 `{sig_data['time']}` 完成電子簽署。")
+                    if "image" in sig_data and sig_data["image"] is not None:
+                        st.image(sig_data["image"], caption="已儲存的手寫簽名記錄", width=220)
                 else:
-                    st.warning("⚠️ 未偵測到 `streamlit-drawable-canvas` 套件，改用一鍵確認簽署：")
-                    if st.button("🖊️ 確認完成簽核"):
-                        now_str = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
-                        circular["signatures"][sid] = {"status": True, "time": now_str, "image": None}
-                        save_circulars_to_json()  # 💾 寫入 JSON
-                        st.success("🎉 完成簽核！")
-                        st.rerun()
+                    st.markdown("✍️ **請於下方畫布進行電子手寫簽署：**")
+                    
+                    if HAS_CANVAS:
+                        canvas_result = st_canvas(
+                            fill_color="rgba(255, 255, 255, 0)",
+                            stroke_width=2,
+                            stroke_color="#000000",
+                            background_color="#FFFFFF",
+                            height=150,
+                            width=350,
+                            drawing_mode="freedraw",
+                            update_streamlit=True,
+                            return_image_data=True,
+                            key=f"canvas_{selected_cid}_{sid}"
+                        )
+                        
+                        if st.button("🖊️ 確認送出電子簽署"):
+                            if canvas_result is not None and canvas_result.image_data is not None:
+                                img = Image.fromarray(canvas_result.image_data.astype('uint8'), 'RGBA')
+                                now_str = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
+                                
+                                circular["signatures"][sid] = {
+                                    "status": True,
+                                    "time": now_str,
+                                    "image": img
+                                }
+                                save_circulars_to_json()  # 💾 寫入 JSON (包含簽名檔 Base64)
+                                st.success("🎉 電子簽署完成並已寫入紀錄！")
+                                st.rerun()
+                    else:
+                        st.warning("⚠️ 未偵測到 `streamlit-drawable-canvas` 套件，改用一鍵確認簽署：")
+                        if st.button("🖊️ 確認完成簽核"):
+                            now_str = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
+                            circular["signatures"][sid] = {"status": True, "time": now_str, "image": None}
+                            save_circulars_to_json()  # 💾 寫入 JSON
+                            st.success("🎉 完成簽核！")
+                            st.rerun()
 
 # -----------------------------------------------------------------------------
 # 頁面 4：傳閱進度看板 (同事可相互查看進度 + ADMIN 簽名畫廊)
@@ -481,8 +552,11 @@ elif menu == "📊 傳閱進度看板":
         selected_cid = st.selectbox("📌 檢視傳閱文件進度：", options=list(c_options.keys()), format_func=lambda x: c_options[x])
         circular = st.session_state.circulars[selected_cid]
         
-        df = st.session_state.staff_df.copy()
+        # 📍 僅載入被指派至該傳閱單的教職員進行統計
+        target_ids = [str(x) for x in circular.get("target_ids", st.session_state.staff_df["staff_id"].astype(str).tolist())]
+        df = st.session_state.staff_df[st.session_state.staff_df["staff_id"].astype(str).isin(target_ids)].copy()
         df["staff_id"] = df["staff_id"].astype(str)
+        
         df["狀態"] = df["staff_id"].apply(
             lambda x: "✅ 已完成" if circular["signatures"].get(x, {}).get("status", False) else "❌ 未完成"
         )
@@ -493,13 +567,14 @@ elif menu == "📊 傳閱進度看板":
         total = len(df)
         done_cnt = len(df[df["狀態"] == "✅ 已完成"])
         pending_cnt = total - done_cnt
+        rate = (done_cnt / total) if total > 0 else 0.0
         
         c1, c2, c3 = st.columns(3)
-        c1.metric("總人數", f"{total} 人")
-        c2.metric("已完成簽核", f"{done_cnt} 人", f"{round(done_cnt/total*100, 1)}%")
-        c3.metric("未完成人數", f"{pending_cnt} 人")
+        c1.metric("🎯 目標簽核人數", f"{total} 人")
+        c2.metric("✅ 已完成簽核", f"{done_cnt} 人", f"{round(rate*100, 1)}%")
+        c3.metric("❌ 未完成人數", f"{pending_cnt} 人")
         
-        st.progress(done_cnt / total)
+        st.progress(rate)
         st.markdown("---")
         
         tab_list = ["❌ 未完成名單", "✅ 已完成名單"]
@@ -510,28 +585,29 @@ elif menu == "📊 傳閱進度看板":
         
         with tabs[0]:
             st.dataframe(
-                df[df["狀態"] == "❌ 未完成"][["staff_id", "name"]].rename(columns={"staff_id": "教職編號", "name": "姓名"}),
+                df[df["狀態"] == "❌ 未完成"][["staff_id", "name", "group"]].rename(columns={"staff_id": "教職編號", "name": "姓名", "group": "組別"}),
                 use_container_width=True
             )
         with tabs[1]:
             st.dataframe(
-                df[df["狀態"] == "✅ 已完成"][["staff_id", "name", "簽核時間"]].rename(columns={"staff_id": "教職編號", "name": "姓名"}),
+                df[df["狀態"] == "✅ 已完成"][["staff_id", "name", "group", "簽核時間"]].rename(columns={"staff_id": "教職編號", "name": "姓名", "group": "組別"}),
                 use_container_width=True
             )
             
-      # ADMIN 獨享：圖文並茂快速審視畫廊 + 單獨重置功能
+        # ADMIN 獨享：圖文並茂快速審視畫廊 + 單獨重置功能
         if is_admin and len(tabs) > 2:
             with tabs[2]:
-                st.subheader("🖼️ 所有教職員簽名圖檔一覽")
+                st.subheader("🖼️ 所有指派教職員簽名圖檔一覽")
                 cols = st.columns(3)
-                for idx, row in df.iterrows():
+                for idx, (_, row) in enumerate(df.iterrows()):
                     sid = str(row["staff_id"])
                     s_name = row["name"]
+                    s_group = row["group"]
                     sig_info = circular["signatures"].get(sid, {})
                     has_sig = sig_info.get("status", False)
                     
                     with cols[idx % 3]:
-                        st.markdown(f"**👤 {s_name}** (`{sid}`)")
+                        st.markdown(f"**👤 {s_name}** (`{sid}`) - *{s_group}*")
                         if has_sig:
                             st.caption(f"簽核時間：{sig_info.get('time', '-')}")
                             if "image" in sig_info and sig_info["image"] is not None:
@@ -564,8 +640,10 @@ elif menu == "🛠️ 行政管理與 Excel 匯出":
         
         circular = st.session_state.circulars[selected_cid]
         
-        report_df = st.session_state.staff_df.copy()
+        target_ids = [str(x) for x in circular.get("target_ids", st.session_state.staff_df["staff_id"].astype(str).tolist())]
+        report_df = st.session_state.staff_df[st.session_state.staff_df["staff_id"].astype(str).isin(target_ids)].copy()
         report_df["staff_id"] = report_df["staff_id"].astype(str)
+        
         report_df["簽核狀態"] = report_df["staff_id"].apply(
             lambda x: "已完成" if circular["signatures"].get(x, {}).get("status", False) else "未完成"
         )
@@ -573,8 +651,8 @@ elif menu == "🛠️ 行政管理與 Excel 匯出":
             lambda x: circular["signatures"].get(x, {}).get("time", "-")
         )
         
-        export_df = report_df[["staff_id", "name", "簽核狀態", "簽核時間", "email"]]
-        export_df.columns = ["教職員編號", "姓名", "簽核狀態", "簽核時間", "電郵地址"]
+        export_df = report_df[["staff_id", "name", "group", "簽核狀態", "簽核時間", "email"]]
+        export_df.columns = ["教職員編號", "姓名", "組別", "簽核狀態", "簽核時間", "電郵地址"]
         
         st.dataframe(export_df, use_container_width=True)
         
@@ -634,7 +712,7 @@ elif menu == "🔔 催辦提醒與通知管理":
         deadline = circular["deadline"]
         days_left = (deadline - today).days
         
-        st.write(f"**當前日期：** {today} ｜ **截止日期：** {deadline}")
+        st.write(f"**當前日期：** {today} ｜ **截止日期：** {deadline} ｜ **指派類型：** {circular.get('target_type', '全體教職員')}")
         
         if days_left <= 3:
             st.warning(f"⚠️ 距離截止日期僅剩 **{days_left} 天**！已觸發前 3 天催辦警示。")
@@ -643,8 +721,11 @@ elif menu == "🔔 催辦提醒與通知管理":
             
         st.markdown("---")
         
+        target_ids = [str(x) for x in circular.get("target_ids", st.session_state.staff_df["staff_id"].astype(str).tolist())]
+        target_staff_df = st.session_state.staff_df[st.session_state.staff_df["staff_id"].astype(str).isin(target_ids)]
+        
         pending_list = [
-            row for _, row in st.session_state.staff_df.iterrows()
+            row for _, row in target_staff_df.iterrows()
             if not circular["signatures"].get(str(row["staff_id"]), {}).get("status", False)
         ]
         pending_df = pd.DataFrame(pending_list)
@@ -670,4 +751,4 @@ elif menu == "🔔 催辦提醒與通知管理":
                 if st.button("📤 發送催辦電郵"):
                     st.success(f"已發送提醒信件至 {len(pending_df)} 位未完成同工！")
             else:
-                st.success("🎉 所有老師皆已完成簽核！")
+                st.success("🎉 所有受指派老師皆已完成簽核！")
