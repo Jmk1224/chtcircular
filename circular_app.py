@@ -151,70 +151,96 @@ st.markdown("""
         background-color: #EFECE6 !important;
         border-right: 1px solid #E2DDD5;
     }
-    h1, h2, h3, h4, h5 {
-        color: #1F3025 !important;
-        font-weight: 700;
+
+    /* ⚡ 縮減全站元件之間的上下空隙 (減少 Space) */
+    div[data-testid="stVerticalBlock"] {
+        gap: 0.7rem !important;
+    }
+    .element-container {
+        margin-bottom: 0.1rem !important;
+    }
+    hr {
+        margin: 0.6rem 0 !important;
     }
 
-    /* 1. 放大 Drop Down 選單標題 (例如：📌 請選擇要簽核的傳閱文件： / 請選擇您的姓名：) */
+    /* 1. 傳閱文件標題 (2627 教師時間表當值核對) 大字體 */
+    h1 {
+        font-size: 2.3rem !important;
+        color: #1F3025 !important;
+        font-weight: 800 !important;
+        margin-bottom: 0.1rem !important;
+    }
+    h2, h3, h4 {
+        font-size: 2.0rem !important;
+        color: #1F3025 !important;
+        font-weight: 800 !important;
+        margin-bottom: 0.1rem !important;
+    }
+
+    /* 2. 下拉選單標題 Label (📌 請選擇要簽核... / 請選擇您的姓名：) */
     .stSelectbox label, div[data-widget="stSelectbox"] label {
-        font-size: 3rem !important;   /* 字體再放大 */
-        font-weight: 900 !important;
+        font-size: 1.5rem !important;     /* 特大標題 */
+        font-weight: 800 !important;
         color: #122017 !important;
         background-color: #DDE8DC !important;
-        padding: 6px 14px !important;
-        border-radius: 6px !important;
+        padding: 8px 16px !important;
+        border-radius: 8px !important;
         border-left: 6px solid #2E4B38 !important;
-        margin-bottom: 10px !important;
+        margin-bottom: 4px !important;    /* 縮減與 BOX 的空隙 */
         display: inline-block !important;
     }
 
-    /* 2. 放大 Drop Down 選單內容選項 (例如：2627 教師時間表當值核對 / 徐 劍) */
+    /* 3. 放大 BOX 外框與選單文字 (例如：徐 劍) */
     div[data-baseweb="select"] {
-        border-radius: 10px !important;
-        border: 2px solid #2E4B38 !important;
+        border-radius: 12px !important;
+        border: 2.5px solid #2E4B38 !important;
         background-color: #FFFFFF !important;
         box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.08) !important;
-        min-height: 56px !important;
+        min-height: 64px !important;       /* 🔍 BOX 盒子高度大幅加高 */
+        display: flex !important;
+        align-items: center !important;
     }
     div[data-baseweb="select"] * {
-        font-size: 3rem !important;  /* 選項文字再放大 */
-        font-weight: 900 !important;
-        color: #101813 !important;      /* 深黑色 */
+        font-size: 1.5rem !important;     /* 🔍 選項文字 (徐 劍) 特大號 */
+        font-weight: 800 !important;
+        color: #000000 !important;        /* 高對比純黑 */
     }
     ul[data-baseweb="menu"] li {
-        font-size: 2rem !important;  /* 下拉清單內項目放大 */
-        padding: 14px 18px !important;
+        font-size: 1.4rem !important;     /* 展開選單時的文字特大 */
+        padding: 16px 20px !important;
     }
 
-    /* 3. 改深色與放大：發佈時間與截止日期 (st.caption) */
+    /* 4. 發佈時間與截止日期 (深色 + 特大字體 + 緊湊間距) */
     [data-testid="stCaptionContainer"], .stCaption {
-        color: #1A1A1A !important;      /* 從淺灰改為深黑 */
-        font-size: 1rem !important;  /* 字體加大 */
+        color: #111111 !important;        /* 純黑深色 */
+        font-size: 1.25rem !important;    /* 特大字體 */
         font-weight: 700 !important;
-        margin-top: 6px !important;
-        margin-bottom: 12px !important;
+        margin-top: 2px !important;
+        margin-bottom: 6px !important;
     }
 
-    /* 4. 改深色與放大：傳閱說明引用區塊 (blockquote) */
+    /* 5. 傳閱內文說明區塊 (blockquote) */
     blockquote {
-        color: #111111 !important;      /* 高對比深黑色 */
-        font-size: 1rem !important;  /* 內文放大 */
+        color: #000000 !important;        /* 純黑深色 */
+        font-size: 1.3rem !important;     /* 特大內文 */
         font-weight: 600 !important;
-        line-height: 1.7 !important;
-        background-color: #EAEFEA !important; /* 加深背景底色 */
+        line-height: 1.6 !important;
+        background-color: #EAEFEA !important;
         border-left: 6px solid #2E4B38 !important;
-        padding: 14px 18px !important;
-        border-radius: 6px !important;
+        padding: 12px 18px !important;
+        border-radius: 8px !important;
+        margin-top: 0.3rem !important;
+        margin-bottom: 0.3rem !important; /* 減少前後 Margin */
     }
 
+    /* 按鈕樣式 */
     .stButton>button {
         background-color: #2E4B38 !important;
         color: #FFFFFF !important;
         border-radius: 8px !important;
         border: none !important;
-        padding: 12px 26px !important;
-        font-size: 1.15rem !important;
+        padding: 12px 28px !important;
+        font-size: 1.2rem !important;
         font-weight: 700 !important;
     }
     .stButton>button:hover {
