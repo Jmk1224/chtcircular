@@ -179,27 +179,27 @@ st.markdown("""
         margin-bottom: 0.1rem !important;
     }
     .stSelectbox label, div[data-widget="stSelectbox"] label {
-        font-size: 4rem !important;
+        font-size: 2.2rem !important;
         font-weight: 800 !important;
         color: #122017 !important;
         background-color: #DDE8DC !important;
-        padding: 8px 16px !important;
-        border-radius: 8px !important;
-        border-left: 6px solid #2E4B38 !important;
-        margin-bottom: 4px !important;
+        padding: 10px 20px !important;
+        border-radius: 10px !important;
+        border-left: 8px solid #2E4B38 !important;
+        margin-bottom: 8px !important;
         display: inline-block !important;
     }
     div[data-baseweb="select"] {
         border-radius: 12px !important;
-        border: 2.5px solid #2E4B38 !important;
+        border: 3px solid #2E4B38 !important;
         background-color: #FFFFFF !important;
         box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.08) !important;
-        min-height: 80px !important;
+        min-height: 90px !important;
         display: flex !important;
         align-items: center !important;
     }
     div[data-baseweb="select"] * {
-        font-size: 2rem !important;
+        font-size: 2.2rem !important;
         font-weight: 800 !important;
         color: #000000 !important;
     }
