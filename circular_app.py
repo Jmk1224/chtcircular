@@ -28,17 +28,19 @@ def load_staff_from_json():
     """從 JSON 載入教職員名單"""
     if os.path.exists(STAFF_FILE):
         try:
-            return pd.read_json(STAFF_FILE, dtype={"staff_id": str})
+            df = pd.read_json(STAFF_FILE, dtype={"staff_id": str})
+            if "group" not in df.columns:
+                df["group"] = "未分類"
+            return df
         except Exception:
             pass
+    # 預設名單新增 group 欄位
     return pd.DataFrame([
-        {"staff_id": "001", "name": "張校長", "email": "principal@school.edu.hk"},
-        {"staff_id": "002", "name": "李副校長", "email": "v_principal@school.edu.hk"},
-        {"staff_id": "003", "name": "陳主任 (教務)", "email": "academic@school.edu.hk"},
-        {"staff_id": "004", "name": "林主任 (訓輔)", "email": "discipline@school.edu.hk"},
-        {"staff_id": "005", "name": "黃老師", "email": "teacher_wong@school.edu.hk"},
-        {"staff_id": "006", "name": "何老師", "email": "teacher_ho@school.edu.hk"},
-        {"staff_id": "007", "name": "周老師", "email": "teacher_chow@school.edu.hk"},
+        {"staff_id": "001", "name": "張校長", "email": "principal@school.edu.hk", "group": "校長室"},
+        {"staff_id": "002", "name": "李老師", "email": "teacher1@school.edu.hk", "group": "P.1 Teacher"},
+        {"staff_id": "003", "name": "陳老師", "email": "teacher2@school.edu.hk", "group": "P.1 Teacher"},
+        {"staff_id": "004", "name": "林老師", "email": "teacher3@school.edu.hk", "group": "P.2 Teacher"},
+        {"staff_id": "005", "name": "黃老師", "email": "teacher4@school.edu.hk", "group": "P.2 Teacher"},
     ])
 
 def save_circulars_to_json():
