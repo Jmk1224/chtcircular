@@ -626,7 +626,7 @@ elif menu == "📊 傳閱進度看板":
                         st.markdown("---")
 
 # -----------------------------------------------------------------------------
-# 頁面 5：行政管理與 Excel 匯出
+# 頁面 5：行政管理與 Excel 匯出（含刪除傳閱單功能）
 # -----------------------------------------------------------------------------
 elif menu == "🛠️ 行政管理與 Excel 匯出":
     st.title(cfg["admin_title"])
@@ -656,6 +656,7 @@ elif menu == "🛠️ 行政管理與 Excel 匯出":
         
         st.dataframe(export_df, use_container_width=True)
         
+        # 下載 Excel 報告
         buffer = io.BytesIO()
         with pd.ExcelWriter(buffer, engine='openpyxl') as writer:
             export_df.to_excel(writer, index=False, sheet_name='傳閱簽核結果')
@@ -667,6 +668,18 @@ elif menu == "🛠️ 行政管理與 Excel 匯出":
             file_name=f"傳閱報告_{circular['title']}_{datetime.date.today()}.xlsx",
             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         )
+        
+        # 🗑️ ADMIN 刪除傳閱單功能區塊
+        st.markdown("---")
+        with st.expander("🗑️ 刪除此傳閱單紀錄 (ADMIN 限用)", expanded=False):
+            st.error("⚠️ 警告：刪除後將無法復原，該份傳閱單的所有簽核紀錄與手寫簽名圖檔將一併刪除！")
+            confirm_delete = st.checkbox(f"我確定要永久刪除《{circular['title']}》", key=f"del_chk_{selected_cid}")
+            
+            if st.button("🔥 確定刪除這份傳閱單", key=f"del_btn_{selected_cid}", disabled=not confirm_delete):
+                del st.session_state.circulars[selected_cid]  # 從 session_state 刪除
+                save_circulars_to_json()                      # 同步寫入 JSON 檔案
+                st.success(f"已成功刪除傳閱單《{circular['title']}》！")
+                st.rerun()
 
 # -----------------------------------------------------------------------------
 # 頁面 6：版面文字與標題自訂設定 (ADMIN)
