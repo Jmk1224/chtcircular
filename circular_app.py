@@ -199,7 +199,7 @@ st.markdown("""
         align-items: center !important;
     }
     div[data-baseweb="select"] * {
-        font-size: 3rem !important;
+        font-size: 2rem !important;
         font-weight: 800 !important;
         color: #000000 !important;
     }
