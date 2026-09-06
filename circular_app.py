@@ -183,7 +183,7 @@ st.markdown("""
         font-weight: 800 !important;
         color: #122017 !important;
         background-color: #DDE8DC !important;
-        padding: 10px 20px !important;
+        padding: 15px 30px !important;
         border-radius: 10px !important;
         border-left: 8px solid #2E4B38 !important;
         margin-bottom: 8px !important;
@@ -194,17 +194,17 @@ st.markdown("""
         border: 3px solid #2E4B38 !important;
         background-color: #FFFFFF !important;
         box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.08) !important;
-        min-height: 90px !important;
+        min-height: 100px !important;
         display: flex !important;
         align-items: center !important;
     }
     div[data-baseweb="select"] * {
-        font-size: 3rem !important;
+        font-size: 5rem !important;
         font-weight: 800 !important;
         color: #000000 !important;
     }
     ul[data-baseweb="menu"] li {
-        font-size: 2rem !important;
+        font-size: 5rem !important;
         padding: 16px 20px !important;
     }
     [data-testid="stCaptionContainer"], .stCaption {
