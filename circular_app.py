@@ -179,7 +179,7 @@ st.markdown("""
 
     /* 2. 下拉選單標題 Label (📌 請選擇要簽核... / 請選擇您的姓名：) */
     .stSelectbox label, div[data-widget="stSelectbox"] label {
-        font-size: 1.5rem !important;     /* 特大標題 */
+        font-size: 2rem !important;     /* 特大標題 */
         font-weight: 800 !important;
         color: #122017 !important;
         background-color: #DDE8DC !important;
@@ -196,12 +196,12 @@ st.markdown("""
         border: 2.5px solid #2E4B38 !important;
         background-color: #FFFFFF !important;
         box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.08) !important;
-        min-height: 64px !important;       /* 🔍 BOX 盒子高度大幅加高 */
+        min-height: 80px !important;       /* 🔍 BOX 盒子高度大幅加高 */
         display: flex !important;
         align-items: center !important;
     }
     div[data-baseweb="select"] * {
-        font-size: 1.5rem !important;     /* 🔍 選項文字 (徐 劍) 特大號 */
+        font-size: 2rem !important;     /* 🔍 選項文字 (徐 劍) 特大號 */
         font-weight: 800 !important;
         color: #000000 !important;        /* 高對比純黑 */
     }
@@ -222,7 +222,7 @@ st.markdown("""
     /* 5. 傳閱內文說明區塊 (blockquote) */
     blockquote {
         color: #000000 !important;        /* 純黑深色 */
-        font-size: 1.3rem !important;     /* 特大內文 */
+        font-size: 1rem !important;     /* 特大內文 */
         font-weight: 600 !important;
         line-height: 1.6 !important;
         background-color: #EAEFEA !important;
