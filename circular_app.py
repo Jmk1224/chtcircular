@@ -216,7 +216,7 @@ st.markdown("""
     }
     blockquote {
         color: #000000 !important;
-        font-size: 1rem !important;
+        font-size: 2rem !important;
         font-weight: 600 !important;
         line-height: 1.6 !important;
         background-color: #EAEFEA !important;
