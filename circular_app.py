@@ -213,7 +213,7 @@ st.markdown("""
     /* 4. 發佈時間與截止日期 (深色 + 特大字體 + 緊湊間距) */
     [data-testid="stCaptionContainer"], .stCaption {
         color: #111111 !important;        /* 純黑深色 */
-        font-size: 1.25rem !important;    /* 特大字體 */
+        font-size: 0.9rem !important;    /* 特大字體 */
         font-weight: 700 !important;
         margin-top: 2px !important;
         margin-bottom: 6px !important;
