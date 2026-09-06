@@ -179,7 +179,7 @@ st.markdown("""
         margin-bottom: 0.1rem !important;
     }
     .stSelectbox label, div[data-widget="stSelectbox"] label {
-        font-size: 3rem !important;
+        font-size: 4rem !important;
         font-weight: 800 !important;
         color: #122017 !important;
         background-color: #DDE8DC !important;
@@ -199,17 +199,17 @@ st.markdown("""
         align-items: center !important;
     }
     div[data-baseweb="select"] * {
-        font-size: 2rem !important;
+        font-size: 3rem !important;
         font-weight: 800 !important;
         color: #000000 !important;
     }
     ul[data-baseweb="menu"] li {
-        font-size: 3rem !important;
+        font-size: 2rem !important;
         padding: 16px 20px !important;
     }
     [data-testid="stCaptionContainer"], .stCaption {
         color: #111111 !important;
-        font-size: 0.7rem !important;
+        font-size: 1rem !important;
         font-weight: 700 !important;
         margin-top: 2px !important;
         margin-bottom: 6px !important;
