@@ -126,7 +126,7 @@ def load_circulars_from_json():
         return {}
 
 # -----------------------------------------------------------------------------
-# 1. 頁面配置與 CSS 樣式
+# 1. 頁面配置與特大號高對比 CSS 樣式
 # -----------------------------------------------------------------------------
 st.set_page_config(
     page_title="學校電子傳閱與簽核系統",
@@ -141,7 +141,7 @@ if "site_config" not in st.session_state:
         "sign_page_title": "📝 教師電子簽核",
         "sign_instructions": "請選擇您的姓名，詳細閱讀文件說明後，於下方簽名畫布進行手寫電子簽署。",
         "progress_page_title": "📊 傳閱進度看板",
-        "admin_title": "🛠️ 行政管理與簽名檔總覽"
+        "admin_title": "🛠️ 行政管理與 Excel 匯出"
     }
 
 cfg = st.session_state.site_config
@@ -157,15 +157,17 @@ st.markdown("""
         background-color: #EFECE6 !important;
         border-right: 1px solid #E2DDD5;
     }
+
     div[data-testid="stVerticalBlock"] {
-        gap: 0.7rem !important;
+        gap: 0.8rem !important;
     }
     .element-container {
-        margin-bottom: 0.1rem !important;
+        margin-bottom: 0.2rem !important;
     }
     hr {
-        margin: 0.6rem 0 !important;
+        margin: 0.8rem 0 !important;
     }
+
     h1 {
         font-size: 2.3rem !important;
         color: #1F3025 !important;
@@ -178,8 +180,10 @@ st.markdown("""
         font-weight: 800 !important;
         margin-bottom: 0.1rem !important;
     }
+
+    /* 🔍 放大下拉選單標題 (Label) */
     .stSelectbox label, div[data-widget="stSelectbox"] label {
-        font-size: 8rem !important;
+        font-size: 2.2rem !important;
         font-weight: 800 !important;
         color: #122017 !important;
         background-color: #DDE8DC !important;
@@ -189,34 +193,47 @@ st.markdown("""
         margin-bottom: 8px !important;
         display: inline-block !important;
     }
+
+    /* 🔍 放大下拉選單底方塊 (Box) */
     div[data-baseweb="select"] {
         border-radius: 12px !important;
         border: 3px solid #2E4B38 !important;
         background-color: #FFFFFF !important;
-        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.08) !important;
-        min-height: 100px !important;
+        box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.12) !important;
+        min-height: 90px !important;
         display: flex !important;
         align-items: center !important;
+        padding: 0px 10px !important;
     }
+
+    /* 🔍 放大底方塊內顯示的選擇文字 */
     div[data-baseweb="select"] * {
-        font-size: 8rem !important;
+        font-size: 2.2rem !important;
         font-weight: 800 !important;
         color: #000000 !important;
+        line-height: 1.4 !important;
     }
-    ul[data-baseweb="menu"] li {
-        font-size: 8rem !important;
+
+    /* 🔍 放大展開下拉選單時的選項文字 */
+    ul[data-baseweb="menu"] li, ul[data-baseweb="menu"] li * {
+        font-size: 1.8rem !important;
+        font-weight: 700 !important;
         padding: 16px 20px !important;
     }
+
+    /* 發佈時間與截止日期 */
     [data-testid="stCaptionContainer"], .stCaption {
         color: #111111 !important;
-        font-size: 1rem !important;
+        font-size: 1.0rem !important;
         font-weight: 700 !important;
         margin-top: 2px !important;
         margin-bottom: 6px !important;
     }
+
+    /* 傳閱內文說明區塊 */
     blockquote {
         color: #000000 !important;
-        font-size: 1.5rem !important;
+        font-size: 1.1rem !important;
         font-weight: 600 !important;
         line-height: 1.6 !important;
         background-color: #EAEFEA !important;
@@ -226,6 +243,8 @@ st.markdown("""
         margin-top: 0.3rem !important;
         margin-bottom: 0.3rem !important;
     }
+
+    /* 按鈕樣式 */
     .stButton>button {
         background-color: #2E4B38 !important;
         color: #FFFFFF !important;
@@ -288,7 +307,7 @@ st.sidebar.markdown("---")
 st.sidebar.caption(f"目前已有 {len(st.session_state.circulars)} 份傳閱單紀錄 (已啟用 JSON 永久儲存)")
 
 # -----------------------------------------------------------------------------
-# 頁面 1：發佈新傳閱單 (ADMIN) - 已移除 st.form 以支援動態選單觸發
+# 頁面 1：發佈新傳閱單 (ADMIN)
 # -----------------------------------------------------------------------------
 if menu == "➕ 發佈新傳閱單":
     st.title("➕ 發佈新電子傳閱單")
@@ -319,7 +338,6 @@ if menu == "➕ 發佈新傳閱單":
     selected_groups = []
     selected_individual_ids = []
     
-    # ⚡ 即時根據選擇展開對應下拉選單
     if target_type == "按組別指派 (Group)":
         selected_groups = st.multiselect("選擇接收此傳閱單的組別：", options=all_groups, default=all_groups[:1] if all_groups else [])
     elif target_type == "按個人指派 (Individual)":
@@ -603,7 +621,7 @@ elif menu == "📊 傳閱進度看板":
                         st.markdown("---")
 
 # -----------------------------------------------------------------------------
-# 頁面 5：行政管理與 Excel 匯出（含刪除表格功能）
+# 頁面 5：行政管理與 Excel 匯出（含修改表格資料與刪除功能）
 # -----------------------------------------------------------------------------
 elif menu == "🛠️ 行政管理與 Excel 匯出":
     st.title(cfg["admin_title"])
@@ -611,7 +629,7 @@ elif menu == "🛠️ 行政管理與 Excel 匯出":
     if not st.session_state.circulars:
         st.info("🍃 目前尚無發佈傳閱文件。")
     else:
-        st.subheader("📋 選擇傳閱表格進行檢視與匯出")
+        st.subheader("📋 選擇傳閱表格進行檢視、修改與匯出")
         c_options = {c_id: f"{c_data['title']} (發佈時間: {c_data['published_at']})" for c_id, c_data in st.session_state.circulars.items()}
         selected_cid = st.selectbox("選擇表格：", options=list(c_options.keys()), format_func=lambda x: c_options[x])
         
@@ -645,8 +663,40 @@ elif menu == "🛠️ 行政管理與 Excel 匯出":
             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         )
         
-        # 🗑️ ADMIN 刪除傳閱單功能
+        # ✏️ ADMIN 修改已發佈傳閱單內容（名稱/說明/截止日期）
         st.markdown("---")
+        with st.expander("✏️ 編輯此傳閱單內容（名稱 / 說明 / 截止日期）", expanded=False):
+            st.write("您可以在此修正已發佈傳閱單的標題名稱、內文說明或調整截止日期：")
+            
+            edit_title = st.text_input(
+                "文件名稱 / 事由：", 
+                value=circular["title"], 
+                key=f"edit_title_{selected_cid}"
+            )
+            edit_desc = st.text_area(
+                "傳閱說明 / 附件摘要：", 
+                value=circular["description"], 
+                height=150, 
+                key=f"edit_desc_{selected_cid}"
+            )
+            edit_deadline = st.date_input(
+                "簽核截止日期：", 
+                value=circular["deadline"], 
+                key=f"edit_dl_{selected_cid}"
+            )
+            
+            if st.button("💾 儲存修改變更", key=f"save_edit_btn_{selected_cid}"):
+                if not edit_title.strip():
+                    st.error("文件名稱不能為空！")
+                else:
+                    circular["title"] = edit_title
+                    circular["description"] = edit_desc
+                    circular["deadline"] = edit_deadline
+                    save_circulars_to_json()
+                    st.success("🎉 已成功更新傳閱單資料！")
+                    st.rerun()
+
+        # 🗑️ ADMIN 刪除傳閱單功能
         with st.expander("🗑️ 刪除此傳閱單紀錄 (ADMIN 限用)", expanded=False):
             st.error("⚠️ 警告：刪除後將無法復原，該份傳閱單的所有簽核紀錄與手寫簽名圖檔將一併刪除！")
             confirm_delete = st.checkbox(f"我確定要永久刪除《{circular['title']}》", key=f"del_chk_{selected_cid}")
