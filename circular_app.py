@@ -158,8 +158,8 @@ st.markdown("""
 
     /* 1. 放大 Drop Down 選單標題 (例如：📌 請選擇要簽核的傳閱文件： / 請選擇您的姓名：) */
     .stSelectbox label, div[data-widget="stSelectbox"] label {
-        font-size: 2rem !important;   /* 字體再放大 */
-        font-weight: 800 !important;
+        font-size: 3rem !important;   /* 字體再放大 */
+        font-weight: 900 !important;
         color: #122017 !important;
         background-color: #DDE8DC !important;
         padding: 6px 14px !important;
@@ -178,8 +178,8 @@ st.markdown("""
         min-height: 56px !important;
     }
     div[data-baseweb="select"] * {
-        font-size: 2rem !important;  /* 選項文字再放大 */
-        font-weight: 700 !important;
+        font-size: 3rem !important;  /* 選項文字再放大 */
+        font-weight: 900 !important;
         color: #101813 !important;      /* 深黑色 */
     }
     ul[data-baseweb="menu"] li {
