@@ -158,7 +158,7 @@ st.markdown("""
 
     /* 1. 放大 Drop Down 選單標題 (例如：📌 請選擇要簽核的傳閱文件： / 請選擇您的姓名：) */
     .stSelectbox label, div[data-widget="stSelectbox"] label {
-        font-size: 1.4rem !important;   /* 字體再放大 */
+        font-size: 2rem !important;   /* 字體再放大 */
         font-weight: 800 !important;
         color: #122017 !important;
         background-color: #DDE8DC !important;
@@ -178,19 +178,19 @@ st.markdown("""
         min-height: 56px !important;
     }
     div[data-baseweb="select"] * {
-        font-size: 1.35rem !important;  /* 選項文字再放大 */
+        font-size: 2rem !important;  /* 選項文字再放大 */
         font-weight: 700 !important;
         color: #101813 !important;      /* 深黑色 */
     }
     ul[data-baseweb="menu"] li {
-        font-size: 1.25rem !important;  /* 下拉清單內項目放大 */
+        font-size: 2rem !important;  /* 下拉清單內項目放大 */
         padding: 14px 18px !important;
     }
 
     /* 3. 改深色與放大：發佈時間與截止日期 (st.caption) */
     [data-testid="stCaptionContainer"], .stCaption {
         color: #1A1A1A !important;      /* 從淺灰改為深黑 */
-        font-size: 1.15rem !important;  /* 字體加大 */
+        font-size: 1rem !important;  /* 字體加大 */
         font-weight: 700 !important;
         margin-top: 6px !important;
         margin-bottom: 12px !important;
@@ -199,7 +199,7 @@ st.markdown("""
     /* 4. 改深色與放大：傳閱說明引用區塊 (blockquote) */
     blockquote {
         color: #111111 !important;      /* 高對比深黑色 */
-        font-size: 1.25rem !important;  /* 內文放大 */
+        font-size: 1rem !important;  /* 內文放大 */
         font-weight: 600 !important;
         line-height: 1.7 !important;
         background-color: #EAEFEA !important; /* 加深背景底色 */
