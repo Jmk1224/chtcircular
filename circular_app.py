@@ -483,7 +483,7 @@ elif menu == "📊 傳閱進度看板":
                 use_container_width=True
             )
             
-        # ADMIN 獨享：圖文並茂快速審視畫廊
+      # ADMIN 獨享：圖文並茂快速審視畫廊 + 單獨重置功能
         if is_admin and len(tabs) > 2:
             with tabs[2]:
                 st.subheader("🖼️ 所有教職員簽名圖檔一覽")
@@ -502,6 +502,13 @@ elif menu == "📊 傳閱進度看板":
                                 st.image(sig_info["image"], width=180)
                             else:
                                 st.success("已完成簽核 (無圖檔)")
+                            
+                            # 🔴 ADMIN 重置按鈕
+                            if st.button(f"🔄 重置 {s_name} 的簽核", key=f"reset_{selected_cid}_{sid}"):
+                                circular["signatures"].pop(sid, None)  # 刪除該筆簽核紀錄
+                                save_circulars_to_json()              # 即時寫入 JSON 儲存
+                                st.success(f"已重置 {s_name} 的簽核！該位同事現在可以重新簽署。")
+                                st.rerun()
                         else:
                             st.error("❌ 尚未完成簽署")
                         st.markdown("---")
