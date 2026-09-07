@@ -6,6 +6,7 @@ import datetime
 import pandas as pd
 import streamlit as st
 from PIL import Image
+from supabase import create_client, Client  # 👈 ADD THIS LINE
 
 try:
     from streamlit_drawable_canvas import st_canvas
@@ -14,40 +15,49 @@ except ImportError:
     HAS_CANVAS = False
 
 # -----------------------------------------------------------------------------
-# 0. JSON 自動存取 helper 函數
+# 0. Supabase 雲端資料庫 Helper 函數 (完全取代原本的本地 JSON)
 # -----------------------------------------------------------------------------
-CIRCULARS_FILE = "circulars_data.json"
-STAFF_FILE = "staff_data.json"
+@st.cache_resource
+def init_supabase() -> Client:
+    """初始化 Supabase 連線"""
+    url = st.secrets["SUPABASE_URL"]
+    key = st.secrets["SUPABASE_KEY"]
+    return create_client(url, key)
+
+supabase = init_supabase()
 
 def save_staff_to_json():
-    """儲存教職員名單至 JSON 檔案"""
+    """儲存教職員名單至 Supabase 雲端資料庫"""
     if "staff_df" in st.session_state:
-        st.session_state.staff_df.to_json(STAFF_FILE, orient="records", force_ascii=False, indent=4)
+        records = st.session_state.staff_df.to_dict(orient="records")
+        for rec in records:
+            rec["staff_id"] = str(rec["staff_id"])
+        supabase.table("staff").upsert(records).execute()
 
 def load_staff_from_json():
-    """從 JSON 載入教職員名單"""
-    if os.path.exists(STAFF_FILE):
-        try:
-            df = pd.read_json(STAFF_FILE, dtype={"staff_id": str})
+    """從 Supabase 載入教職員名單"""
+    try:
+        res = supabase.table("staff").select("*").execute()
+        if res.data:
+            df = pd.DataFrame(res.data)
+            df["staff_id"] = df["staff_id"].astype(str)
             if "group" not in df.columns:
                 df["group"] = "未分類"
             return df
-        except Exception:
-            pass
+    except Exception as e:
+        st.error(f"從 Supabase 載入教職員資料失敗：{e}")
+        
     return pd.DataFrame([
         {"staff_id": "001", "name": "張校長", "email": "principal@school.edu.hk", "group": "校長室"},
         {"staff_id": "002", "name": "李老師", "email": "teacher1@school.edu.hk", "group": "P.1 Teacher"},
         {"staff_id": "003", "name": "陳老師", "email": "teacher2@school.edu.hk", "group": "P.1 Teacher"},
-        {"staff_id": "004", "name": "林老師", "email": "teacher3@school.edu.hk", "group": "P.2 Teacher"},
-        {"staff_id": "005", "name": "黃老師", "email": "teacher4@school.edu.hk", "group": "P.2 Teacher"},
     ])
 
 def save_circulars_to_json():
-    """儲存所有傳閱單與簽名檔 (圖片轉 Base64) 至 JSON 檔案"""
+    """儲存所有傳閱單與簽名檔至 Supabase 雲端資料庫"""
     if "circulars" not in st.session_state:
         return
     
-    data_to_save = {}
     for cid, cinfo in st.session_state.circulars.items():
         signatures_copy = {}
         for sid, sinfo in cinfo.get("signatures", {}).items():
@@ -64,7 +74,7 @@ def save_circulars_to_json():
                 
             signatures_copy[str(sid)] = sig_entry
             
-        data_to_save[cid] = {
+        row_data = {
             "id": cinfo["id"],
             "title": cinfo["title"],
             "description": cinfo["description"],
@@ -76,20 +86,18 @@ def save_circulars_to_json():
             "signatures": signatures_copy
         }
         
-    with open(CIRCULARS_FILE, "w", encoding="utf-8") as f:
-        json.dump(data_to_save, f, ensure_ascii=False, indent=4)
+        supabase.table("circulars").upsert(row_data).execute()
 
 def load_circulars_from_json():
-    """從 JSON 載入傳閱單與將 Base64 還原為 PIL 簽名圖檔"""
-    if not os.path.exists(CIRCULARS_FILE):
-        return {}
-    
+    """從 Supabase 載入所有傳閱單與手寫簽名"""
     try:
-        with open(CIRCULARS_FILE, "r", encoding="utf-8") as f:
-            raw_data = json.load(f)
+        res = supabase.table("circulars").select("*").execute()
+        if not res.data:
+            return {}
             
         loaded_circulars = {}
-        for cid, cinfo in raw_data.items():
+        for cinfo in res.data:
+            cid = cinfo["id"]
             signatures = {}
             for sid, sinfo in cinfo.get("signatures", {}).items():
                 sig_entry = {
@@ -107,8 +115,6 @@ def load_circulars_from_json():
             if isinstance(deadline_val, str):
                 deadline_val = datetime.datetime.strptime(deadline_val, "%Y-%m-%d").date()
                 
-            default_target_ids = st.session_state.staff_df["staff_id"].astype(str).tolist() if "staff_df" in st.session_state else []
-
             loaded_circulars[cid] = {
                 "id": cinfo["id"],
                 "title": cinfo["title"],
@@ -117,12 +123,12 @@ def load_circulars_from_json():
                 "published_at": cinfo["published_at"],
                 "target_type": cinfo.get("target_type", "全體教職員"),
                 "target_groups": cinfo.get("target_groups", []),
-                "target_ids": [str(x) for x in cinfo.get("target_ids", default_target_ids)],
+                "target_ids": [str(x) for x in cinfo.get("target_ids", [])],
                 "signatures": signatures
             }
         return loaded_circulars
     except Exception as e:
-        st.error(f"載入 JSON 歷史紀錄失敗：{e}")
+        st.error(f"從 Supabase 載入傳閱單資料失敗：{e}")
         return {}
 
 # -----------------------------------------------------------------------------
